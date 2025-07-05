@@ -6,7 +6,7 @@ ansible-plexmediaserver
 ```
 
 An [Ansible](https://www.ansible.com/)-role which installs and configures `Plex Media Server` on the target hosts.  
-Optionally install the plugins  
+Optionally install these plugins:  
 - [Absolute Media Scanner](https://github.com/ZeroQI/Absolute-Series-Scanner)
 - [Hama.bundle](https://github.com/ZeroQI/Hama.bundle)
 - [PlexTraktSync](https://github.com/Taxel/PlexTraktSync)
@@ -20,7 +20,8 @@ Currently supports following distributions
 - RHEL-based (RockyLinux, AlmaLinux)
 
 ## Ansible
-You need Ansible installed on the control-node to run this node. #TODO: Instructions
+You need Ansible installed on the control-node to run this node. **#TODO:** Instructions are often included in my other
+roles
 
 
 Role Variables
