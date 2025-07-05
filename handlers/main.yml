@@ -1,0 +1,32 @@
+---
+# handlers file for ansible-plexmediaserver
+
+- name: "Reload firewalld"
+  become: yes
+  service:
+    name: "firewalld"
+    state: reloaded
+
+- name: "Restart plexmediaserver"
+  become: yes
+  service:
+    name: "plexmediaserver"
+    state: restarted
+
+- name: "Reload daemons"
+  become: yes
+  shell:
+    cmd: "systemctl daemon-reload"
+
+- name: "Enable plextraktsync service"
+  become: yes
+  service:
+    name: "plextraktsync.service"
+    enabled: yes
+    state: started
+
+#DEBIAN
+#- name: "Add plex GPG-key"
+#  command:
+#    cmd: "curl https://downloads.plex.tv/plex-keys/PlexSign.key | sudo apt-key add -"
+#  become: yes

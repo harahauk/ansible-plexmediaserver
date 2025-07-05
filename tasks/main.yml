@@ -1,0 +1,131 @@
+---
+# tasks file for ansible-plexmediaserver
+
+- name: "Add RPM-based packages.rpm_repositorysitory"
+  #TODO: when RHEL/RPM
+  become: yes
+  #notify: "Add plex GPG-key"
+  yum_repository:
+    name:         "{{ plexmediaserver.packages.rpm_repository.name }}"
+    baseurl:      "{{ plexmediaserver.packages.rpm_repository.baseurl }}"
+    gpgkey:       "{{ plexmediaserver.packages.rpm_repository.gpgkey }}"
+    gpgcheck:     "{{ plexmediaserver.packages.rpm_repository.gpgcheck }}"
+    description:  "{{ plexmediaserver.packages.rpm_repository.description }}"
+    enabled: yes
+
+- name: "Upgrade existing system-wide packages to latest version"
+  become: yes
+  package:
+    name: "*"
+    state: "latest"
+
+- name: "Install cryptopolicies modules and scipts for policy-maipulation"
+  when: "{{ plexmediaserver.packages.downgrade_security }}"
+  become: yes
+  package:
+    name:
+    - "crypto-policies"
+    - "crypto-policies-scripts"
+    state: present
+
+
+- name: "Downgrade system policy on crypto when plex maintainers are behind on their implementation"
+  become: yes
+  when: "{{ plexmediaserver.packages.downgrade_security }}"
+  command:
+    cmd: "update-crypto-policies --set DEFAULT:SHA1"
+  ignore_errors: yes # Forgot to document the error-message
+
+- name: "Install 'Plex Media Server'"
+  become: yes
+  package:
+   name: "{{ plexmediaserver.packages.names }}"
+   state: present
+
+- name: "Install packages supporting 'Plex Media Server'-plugins"
+  when: plex_install_plugins
+  become: yes
+  package:
+   name: "{{ plexmediaserver.packages.names_plugins }}"
+   state: present
+
+
+- name: "Enable Plex as a service"
+  become: yes
+  service:
+    name: "{{ plexmediaserver.service.name }}"
+    state: started
+    enabled: yes
+
+- name: "Open port in firewalld"
+  #TODO: When firewalld-used
+  become: yes
+  firewalld:
+    port: "32400/tcp"
+    permanent: yes
+    state: enabled
+  notify: "Reload firewalld"
+  ignore_errors: yes #TODO: Implement actual fail-conditions
+
+- name: "Determine the name of the plugin directory"
+  shell: # List directory by date, getting the newest first then pick one line matching PLug-ins with grep
+    cmd: "ls -t /usr/lib/plexmediaserver/Resources/ |grep -m1 Plug-ins"
+  register: plugin_dir
+  changed_when: no # ls is parsed as a change
+  tags:
+    - directory
+
+- debug:
+  msg: "#TODO: Check for duplicate directories then move or delete files in the least populated one"
+
+- debug:
+    msg: "{{ plugin_dir.stdout }}"
+  tags:
+    - directory
+  when: yes
+
+- name: "Install PlexTraktSync plugin"
+  when: plex_install_plugins
+  become: yes
+  pip:
+    name: "PlexTraktSync"
+    state: "present"
+    executable: "pip3"
+    extra_args: "-U"
+    #"--user"
+
+- name: "Make sure plugin-directory for series scanners exists"
+  when: plex_install_plugins
+  file:
+    path: "/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Scanners/Series"
+    state: "directory"
+  become: yes
+
+- name: "Install 'Absolute Series Scanner'"
+  when: plex_install_plugins
+  become: yes
+  get_url:
+    url: "https://raw.githubusercontent.com/ZeroQI/Absolute-Series-Scanner/master/Scanners/Series/Absolute%20Series%20Scanner.py"
+    #dest: "/usr/lib/plexmediaserver/Resources/{{ plugin_dir.stdout }}/Scanners.bundle/Contents/Resources/Series/Absolute Series Scanner.py"
+    dest: "/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Scanners/Series/Absolute Series Scanner.py"
+    #validate_certs: no
+  ignore_errors: yes #TODO: Actual error handling
+  notify: "Restart plexmediaserver"
+
+- name: "Install 'Hama.bundle'"
+  notify: "Restart plexmediaserver"
+  become: yes
+  git:
+    packages.rpm_repository: "https://github.com/ZeroQI/Hama.bundle"
+    dest: "/usr/lib/plexmediaserver/Resources/{{ plugin_dir.stdout }}/Hama.bundle"
+    update: yes
+  ignore_errors: yes
+
+- name: "Install 'plextraktsync' as a service"
+  become: yes
+  copy:
+    src: "plextraktsync.service"
+    dest: "/etc/systemd/system/plextraktsync.service"
+  notify:
+  - "Reload daemons"
+  - "Enable plextraktsync service"

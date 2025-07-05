@@ -1,0 +1,26 @@
+---
+# defaults file for ansible-plexmediaserver
+plex_install_plugins: yes
+plex_package_manager_downgrade_security: no
+#plex_username: no #TODO: If populated should run the service under this user
+
+
+plexmediaserver:
+  packages:
+    downgrade_sec: {{ plex_package_manager_downgrade_security }}
+    rpm_repository:
+      name: "plex"
+      baseurl: "https://downloads.plex.tv/repo/rpm/$basearch/"
+      # enabled: True
+      description: "Plex RPM repository (stored using Ansible)"
+      gpgkey: "https://downloads.plex.tv/plex-keys/PlexSign.key"
+      gpgcheck: yes
+    apt_repository:
+      name: "Not implemented"
+  names:
+  - "plexmediaserver"
+  - "python3-pip" # For plugins
+  names_plugins:
+  - "libxslt" # For Absolute Series Scanner
+  service:
+    name: "plexmediaserver"

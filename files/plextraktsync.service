@@ -1,0 +1,14 @@
+[Unit]
+Description=PlexTraktSync watch daemon
+After=network-online.target
+
+[Service]
+#ExecStart=/home/jackboy/PlexTraktSync/plextraktsync.sh watch (change this to your install path)
+ExecStart=/usr/local/bin/plextraktsync watch
+Restart=on-failure
+RestartSec=10
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
