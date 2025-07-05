@@ -5,18 +5,18 @@ ansible-plexmediaserver
 @ Staging
 ```
 
-An [Ansible](https://www.ansible.com/)-role which installs and configures `Plex Media Server` on the target hosts.
-Optionally install the plugins
-- [Absolute Media Scanner]
-- [Hama.bundle]
-- [PlexTraktSync]
+An [Ansible](https://www.ansible.com/)-role which installs and configures `Plex Media Server` on the target hosts.  
+Optionally install the plugins  
+- [Absolute Media Scanner](https://github.com/ZeroQI/Absolute-Series-Scanner)
+- [Hama.bundle](https://github.com/ZeroQI/Hama.bundle)
+- [PlexTraktSync](https://github.com/Taxel/PlexTraktSync)
 
 
 Requirements
 ------------
 
 ## Linux
-Currently supports following distributions
+Currently supports following distributions  
 - RHEL-based (RockyLinux, AlmaLinux)
 
 ## Ansible
