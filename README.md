@@ -27,7 +27,7 @@ Role Variables
 --------------
 | Variable              | Mandatory | Default   | Description |
 | --------------------- | --------- | --------- | ----------- |
-| plex_install_plugins  | no        | yes       | Whether the extra plugins mentioned above should be installed or not |
+| plex_install_plugins  | no        | yes       | Decides if the extra plugins (and dependencies) mentioned above should be installed or not |
 
 
 
@@ -41,12 +41,12 @@ xor:
 
 Example Playbook
 ----------------
-```
+```yaml
 - hosts: plexmediaserver_group
   roles:
   - ansible-plexmediaserver    # Change to the folder-name to which this Git-checkout resides
   vars:
-    plexmediaserver_user: "my_unprivileged_user"
+    plex_install_plugins: no
 ```
 
 Author Information
