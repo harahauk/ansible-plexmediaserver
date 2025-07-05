@@ -2,6 +2,7 @@
 # defaults file for ansible-plexmediaserver
 plex_install_plugins: yes
 plex_package_manager_downgrade_security: no
+plex_perform_system_wide_upgrade: yes
 #plex_username: no #TODO: If populated should run the service under this user
 
 

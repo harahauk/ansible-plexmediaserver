@@ -4,7 +4,7 @@
 - name: "Add RPM-based package-repository"
   #TODO: when RHEL/RPM
   become: yes
-  #notify: "Add plex GPG-key"
+  #TODO: eeded on some OSes notify: "Add plex GPG-key"
   yum_repository:
     name:         "{{ plexmediaserver.packages.rpm_repository.name }}"
     baseurl:      "{{ plexmediaserver.packages.rpm_repository.baseurl }}"
@@ -14,6 +14,7 @@
     enabled: yes
 
 - name: "Upgrade existing system-wide packages to latest version"
+  when: plex_perform_system_wide_upgrade
   become: yes
   package:
     name: "*"
