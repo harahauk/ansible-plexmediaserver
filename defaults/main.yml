@@ -7,7 +7,7 @@ plex_package_manager_downgrade_security: no
 
 plexmediaserver:
   packages:
-    downgrade_sec: {{ plex_package_manager_downgrade_security }}
+    downgrade_security: "{{ plex_package_manager_downgrade_security }}"
     rpm_repository:
       name: "plex"
       baseurl: "https://downloads.plex.tv/repo/rpm/$basearch/"
@@ -17,10 +17,10 @@ plexmediaserver:
       gpgcheck: yes
     apt_repository:
       name: "Not implemented"
-  names:
-  - "plexmediaserver"
-  - "python3-pip" # For plugins
-  names_plugins:
-  - "libxslt" # For Absolute Series Scanner
+    names:
+    - "plexmediaserver"
+    - "python3-pip" # For plugins
+    names_plugins:
+    - "libxslt" # For Absolute Series Scanner
   service:
     name: "plexmediaserver"

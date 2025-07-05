@@ -1,7 +1,7 @@
 ---
 # tasks file for ansible-plexmediaserver
 
-- name: "Add RPM-based packages.rpm_repositorysitory"
+- name: "Add RPM-based package-repository"
   #TODO: when RHEL/RPM
   become: yes
   #notify: "Add plex GPG-key"
@@ -20,7 +20,7 @@
     state: "latest"
 
 - name: "Install cryptopolicies modules and scipts for policy-maipulation"
-  when: "{{ plexmediaserver.packages.downgrade_security }}"
+  when: plexmediaserver.packages.downgrade_security
   become: yes
   package:
     name:
@@ -31,7 +31,7 @@
 
 - name: "Downgrade system policy on crypto when plex maintainers are behind on their implementation"
   become: yes
-  when: "{{ plexmediaserver.packages.downgrade_security }}"
+  when: plexmediaserver.packages.downgrade_security
   command:
     cmd: "update-crypto-policies --set DEFAULT:SHA1"
   ignore_errors: yes # Forgot to document the error-message
@@ -76,12 +76,13 @@
     - directory
 
 - debug:
-  msg: "#TODO: Check for duplicate directories then move or delete files in the least populated one"
+    msg: "Check for duplicate directories and then move or delete files in the least populated one#  TODO:"
 
-- debug:
+- name: "The path determined for the 'plugin'-directory"
+  debug:
     msg: "{{ plugin_dir.stdout }}"
   tags:
-    - directory
+  - directory
   when: yes
 
 - name: "Install PlexTraktSync plugin"
@@ -116,7 +117,7 @@
   notify: "Restart plexmediaserver"
   become: yes
   git:
-    packages.rpm_repository: "https://github.com/ZeroQI/Hama.bundle"
+    repo: "https://github.com/ZeroQI/Hama.bundle"
     dest: "/usr/lib/plexmediaserver/Resources/{{ plugin_dir.stdout }}/Hama.bundle"
     update: yes
   ignore_errors: yes
