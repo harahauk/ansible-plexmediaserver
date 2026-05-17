@@ -12,8 +12,8 @@
 FROM dhi.io/python:3.13-debian13-dev
 # The above is a hardened image, do not "apt update"
 # Requires "docker login dhi.io" to pull
-# #TODO: bash is not really a requirement, used for debugging
-RUN apt install -y bash # git
+# NOTE: 'bash' is not really a requirement, used for debugging
+# RUN apt install -y bash # git
 # Optially build the package via git
 # RUN git clone https://github.com/Taxel/PlexTraktSync
 RUN pip install plextraktsync
