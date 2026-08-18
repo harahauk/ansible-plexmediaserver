@@ -28,7 +28,7 @@ Role Variables
 --------------
 | Variable                          | Mandatory | Default   | Description |
 | --------------------------------- | --------- | --------- | ----------- |
-| plex_install_plugins              | no        | yes       | Decides if the extra plugins (and dependencies) mentioned above should be installed or not |
+| plex_install_plugins              | no        | no       | Decides if the extra plugins (and dependencies) mentioned above should be installed or not |
 | plex_perform_system_wide_upgrade  | no        | yes       | Upgrades 'all' packages using the package-manager, useful
 when the server is running only plex and you'd like to get all maintenancy done |
 
@@ -39,6 +39,13 @@ This role might "work" on a wide range of Linux-distributions, but below are the
 
 xor:
   - AlmaLinux 9
+
+PlexTraktSync
+-------------
+Note: Is now a paid feautre since 2026-08-18
+Reacting to `CRITICAL Error running sync command: Trakt error: Unable to refresh token`
+- `plextraktsync plex-login`
+- `plextraktsync trak-login`
 
 
 Example Playbook
