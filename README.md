@@ -1,8 +1,10 @@
 ansible-plexmediaserver
 =======================
-**NOTE**: This is one of my oldest roles and currently is only avaialbe for testing
+**NOTE**: This is one of my oldest roles and currently is only avaialbe for testing  
 **NOTE2**: Plex has become notoriosly bas at Anime, I havent noticed sice I havent really been into it for a few years, but looking at
-alternatives.
+alternatives  
+**NOTE3**: It
+n truth best to skio this one altogether while I either fix it or ditch it.
 
 ```diff
 # Project maturity (- Dev|@ Staging|+ Prod):
