@@ -1,23 +1,26 @@
 ansible-plexmediaserver
 =======================
+NOTE: This is one of my oldest roles and currently is only avaialbe for testing
 ```diff
 # Project maturity (- Dev|@ Staging|+ Prod):
 @ Staging
 ```
 
-An [Ansible](https://www.ansible.com/)-role which installs and configures `Plex Media Server` on the target hosts.  
-Optionally install these plugins:  
+An [Ansible](https://www.ansible.com/)-role which installs and configures `Plex Media Server` on the target host(s).
+It optionally install these plugins suitable for handling Anime-content:
 - [Absolute Media Scanner](https://github.com/ZeroQI/Absolute-Series-Scanner)
 - [Hama.bundle](https://github.com/ZeroQI/Hama.bundle)
-- [PlexTraktSync](https://github.com/Taxel/PlexTraktSync)
+- [PlexTraktSync](https://github.com/Taxel/PlexTraktSync) NOTE: Being discontinued
 
 
 Requirements
 ------------
 
 ## Linux
-Currently supports following distributions  
-- RHEL-based (RockyLinux, AlmaLinux)
+Currently supports following distributions
+- RHEL-based
+  - RockyLinux 9
+  - AlmaLinux 9
 
 ## Ansible
 You need Ansible installed on the control-node to run this node. **#TODO:** Instructions are often included in my other
@@ -32,13 +35,6 @@ Role Variables
 | plex_perform_system_wide_upgrade  | no        | yes       | Upgrades 'all' packages using the package-manager, useful
 when the server is running only plex and you'd like to get all maintenancy done |
 
-
-Dependencies
-------------
-This role might "work" on a wide range of Linux-distributions, but below are the distros that are actually tested.
-
-xor:
-  - AlmaLinux 9
 
 PlexTraktSync
 -------------

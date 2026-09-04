@@ -2,6 +2,7 @@
 # tasks file for ansible-plexmediaserver
 
 - name: "Add RPM-based package-repository"
+  when: false # I want to observer the packages new versions
   #TODO: when RHEL/RPM
   become: yes
   #TODO: eeded on some OSes notify: "Add plex GPG-key"
@@ -15,14 +16,14 @@
 
 - name: "Upgrade existing system-wide packages to latest version"
   when: plex_perform_system_wide_upgrade
-  become: yes
+  become: true
   package:
     name: "*"
     state: "latest"
 
 - name: "Install cryptopolicies modules and scipts for policy-maipulation"
   when: plexmediaserver.packages.downgrade_security
-  become: yes
+  become: true
   package:
     name:
     - "crypto-policies"
@@ -31,7 +32,7 @@
 
 
 - name: "Downgrade system policy on crypto when plex maintainers are behind on their implementation"
-  become: yes
+  become: true
   when: plexmediaserver.packages.downgrade_security
   command:
     cmd: "update-crypto-policies --set DEFAULT:SHA1"
@@ -51,7 +52,7 @@
    state: present
 
 
-- name: "Enable Plex as a service"
+- name: "Enable Plexmediaserver as a service on boot"
   become: yes
   service:
     name: "{{ plexmediaserver.service.name }}"
@@ -87,7 +88,7 @@
   when: yes
 
 - name: "Install PlexTraktSync plugin"
-  when: plex_install_plugins
+  when: false # Temp override # plex_install_plugins
   become: yes
   pip:
     name: "PlexTraktSync"
@@ -97,21 +98,21 @@
     #"--user"
 
 - name: "Make sure plugin-directory for series scanners exists"
-  when: plex_install_plugins
+  when: plex_install_plugins or plex_install_abs
   file:
     path: "/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Scanners/Series"
     state: "directory"
   become: yes
 
 - name: "Install 'Absolute Series Scanner'"
-  when: plex_install_plugins
+  when: plex_install_plugins or plex_install_abs
   become: yes
   get_url:
     url: "https://raw.githubusercontent.com/ZeroQI/Absolute-Series-Scanner/master/Scanners/Series/Absolute%20Series%20Scanner.py"
     #dest: "/usr/lib/plexmediaserver/Resources/{{ plugin_dir.stdout }}/Scanners.bundle/Contents/Resources/Series/Absolute Series Scanner.py"
     dest: "/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Scanners/Series/Absolute Series Scanner.py"
     #validate_certs: no
-  ignore_errors: yes #TODO: Actual error handling
+  #ignore_errors: yes #TODO: Actual error handling
   notify: "Restart plexmediaserver"
 
 - name: "Install 'Hama.bundle'"
@@ -124,6 +125,7 @@
   ignore_errors: yes
 
 - name: "Install 'plextraktsync' as a service"
+  when: false # temporarily halted
   become: yes
   copy:
     src: "plextraktsync.service"

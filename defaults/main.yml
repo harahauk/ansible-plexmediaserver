@@ -1,8 +1,10 @@
 ---
 # defaults file for ansible-plexmediaserver
 plex_install_plugins: false
-plex_package_manager_downgrade_security: no
-plex_perform_system_wide_upgrade: yes
+plex_install_hama: false
+plex_install_abs: false
+plex_package_manager_downgrade_security: false # Plex-packages seem to lag-behaind on proper SHA-signing
+plex_perform_system_wide_upgrade: true
 #plex_username: no #TODO: If populated should run the service under this user
 
 
