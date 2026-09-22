@@ -2,10 +2,10 @@
 # tasks file for ansible-plexmediaserver
 
 - name: "Add RPM-based package-repository"
-  when: false # I want to observer the packages new versions
+  when: plex_add_package_repos # I want to observer the packages new versions and/or possibl just use that
+  become: true
   #TODO: when RHEL/RPM
-  become: yes
-  #TODO: eeded on some OSes notify: "Add plex GPG-key"
+  #TODO: Needed on some OSes notify: "Add plex GPG-key"
   yum_repository:
     name:         "{{ plexmediaserver.packages.rpm_repository.name }}"
     baseurl:      "{{ plexmediaserver.packages.rpm_repository.baseurl }}"
@@ -17,19 +17,19 @@
 - name: "Upgrade existing system-wide packages to latest version"
   when: plex_perform_system_wide_upgrade
   become: true
-  package:
+  #package: #TODO: Change to 'dnf or 'apt' depending on OS
+  dnf:
     name: "*"
     state: "latest"
 
 - name: "Install cryptopolicies modules and scipts for policy-maipulation"
   when: plexmediaserver.packages.downgrade_security
   become: true
-  package:
+  dnf:
     name:
     - "crypto-policies"
     - "crypto-policies-scripts"
     state: present
-
 
 - name: "Downgrade system policy on crypto when plex maintainers are behind on their implementation"
   become: true
@@ -39,17 +39,20 @@
   ignore_errors: yes # Forgot to document the error-message
 
 - name: "Install 'Plex Media Server'"
-  become: yes
-  package:
-   name: "{{ plexmediaserver.packages.names }}"
+  become: true
+  dnf:
+   name: "{{ plexmediaserver.packages.names.core }}"
    state: present
 
-- name: "Install packages supporting 'Plex Media Server'-plugins"
-  when: plex_install_plugins
-  become: yes
-  package:
-   name: "{{ plexmediaserver.packages.names_plugins }}"
+- name: "Install packages depended by desired Plex-plugins"
+  when: plex_install_plugins or plex_install_abs
+  become: true
+  notify: "Restart plexmediaserver"
+  dnf:
+   name: 
+    - "{{ item }}"
    state: present
+  with_items: "{{ plexmediaserver.packages.names.abs }}"
 
 
 - name: "Enable Plexmediaserver as a service on boot"
@@ -67,11 +70,12 @@
     permanent: yes
     state: enabled
   notify: "Reload firewalld"
-  ignore_errors: yes #TODO: Implement actual fail-conditions
+  ignore_errors: yes #TODO: Ususally just means firewall is not implemented
 
+#TODO: Review this logic, seems flawed
 - name: "Determine the name of the plugin directory"
   shell: # List directory by date, getting the newest first then pick one line matching PLug-ins with grep
-    cmd: "ls -t /usr/lib/plexmediaserver/Resources/ |grep -m1 Plug-ins"
+    cmd: "ls -rt /usr/lib/plexmediaserver/Resources/ |grep -m1 Plug-ins"
   register: plugin_dir
   changed_when: no # ls is parsed as a change
   tags:
@@ -103,26 +107,37 @@
     path: "/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Scanners/Series"
     state: "directory"
   become: yes
+  become_user: plex
 
 - name: "Install 'Absolute Series Scanner'"
   when: plex_install_plugins or plex_install_abs
   become: yes
+  become_user: plex
   get_url:
-    url: "https://raw.githubusercontent.com/ZeroQI/Absolute-Series-Scanner/master/Scanners/Series/Absolute%20Series%20Scanner.py"
+    url: "{{ abs_url }}"
     #dest: "/usr/lib/plexmediaserver/Resources/{{ plugin_dir.stdout }}/Scanners.bundle/Contents/Resources/Series/Absolute Series Scanner.py"
     dest: "/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Scanners/Series/Absolute Series Scanner.py"
+    mode: +x
     #validate_certs: no
   #ignore_errors: yes #TODO: Actual error handling
   notify: "Restart plexmediaserver"
 
+- name: "Make sure Git trusts Hama as a non-root entity inside Plex plugin-structure"
+  become: true
+  changed_when: false #TODO: On stderr
+    #become_user: plex
+  shell:
+    cmd: "git config --global --add safe.directory /usr/lib/plexmediaserver/Resources/{{ plugin_dir.stdout }}/Hama.bundle"
+
 - name: "Install 'Hama.bundle'"
   notify: "Restart plexmediaserver"
   become: yes
+    #become_user: plex
   git:
     repo: "https://github.com/ZeroQI/Hama.bundle"
     dest: "/usr/lib/plexmediaserver/Resources/{{ plugin_dir.stdout }}/Hama.bundle"
     update: yes
-  ignore_errors: yes
+  ignore_errors: false # Debuggig
 
 - name: "Install 'plextraktsync' as a service"
   when: false # temporarily halted
@@ -133,3 +148,9 @@
   notify:
   - "Reload daemons"
   - "Enable plextraktsync service"
+
+- name: "Stop 'plextraktsync' as a service for now"
+  become: yes
+  service:
+    name: "plextraktsync.service"
+    state: stopped
